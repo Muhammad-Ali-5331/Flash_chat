@@ -4,15 +4,43 @@ import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static String id = "welcomeScreen";
+
+  const WelcomeScreen({super.key});
   @override
   WelcomeScreenState createState() => WelcomeScreenState();
 }
 
-class WelcomeScreenState extends State<WelcomeScreen> {
+class WelcomeScreenState extends State<WelcomeScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation animation;
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 3),
+    );
+    animation = ColorTween(
+      begin: Colors.red,
+      end: Colors.blue,
+    ).animate(controller);
+    controller.repeat(reverse: true);
+    controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: animation.value,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -22,7 +50,13 @@ class WelcomeScreenState extends State<WelcomeScreen> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  SizedBox(height: 60.0, child: Image.asset('images/logo.png')),
+                  Hero(
+                    tag: 'logo',
+                    child: SizedBox(
+                      height: 60.0,
+                      child: Image.asset('images/logo.png'),
+                    ),
+                  ),
                   Text(
                     'Flash Chat',
                     style: TextStyle(
