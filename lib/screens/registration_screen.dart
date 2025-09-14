@@ -1,6 +1,8 @@
 import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../components/rounded_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -10,6 +12,9 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class RegistrationScreenState extends State<RegistrationScreen> {
+  late String email;
+  late String password;
+  final _authorizer = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,38 +34,47 @@ class RegistrationScreenState extends State<RegistrationScreen> {
             ),
             SizedBox(height: 48.0),
             TextField(
+              keyboardType: TextInputType.emailAddress,
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.center,
               onChanged: (value) {
-                //Do something with the user input.
+                //Email Entry Field
+                email = value;
               },
-              decoration: kTextFieldDecoration.copyWith(hintText: 'Register'),
+              decoration: kTextFieldDecoration.copyWith(
+                hintText: 'Enter your email',
+              ),
             ),
             SizedBox(height: 8.0),
             TextField(
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.center,
+              obscureText: true,
               onChanged: (value) {
-                //Do something with the user input.
+                //Password Entry Field
+                password = value;
               },
-              decoration: InputDecoration(
+              decoration: kTextFieldDecoration.copyWith(
                 hintText: 'Enter your password',
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 10.0,
-                  horizontal: 20.0,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueAccent, width: 1.0),
-                  borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                  borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                ),
               ),
             ),
             SizedBox(height: 24.0),
-            RoundedButton(Colors.blueAccent, 'Register', () {
-              Navigator.pushNamed(context, RegistrationScreen.id);
+            RoundedButton(Colors.blueAccent, 'Register', () async {
+              try {
+                final userCredentials = await _authorizer
+                    .createUserWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+                final newUser = userCredentials.user;
+                if (newUser != null) {
+                  Navigator.pushNamed(context, ChatScreen.id);
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Registration failed: $e')),
+                );
+              }
             }),
           ],
         ),
