@@ -15,7 +15,7 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   late String email;
   late String password;
-  bool _isloading = false;
+  bool _isLoading = false;
   final _auth = FirebaseAuth.instance;
   late User loggedInUser;
   @override
@@ -23,7 +23,7 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: ModalProgressHUD(
-        inAsyncCall: _isloading,
+        inAsyncCall: _isLoading,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
@@ -65,7 +65,7 @@ class LoginScreenState extends State<LoginScreen> {
                 FocusScope.of(context).unfocus();
                 await Future.delayed(Duration(milliseconds: 500));
                 setState(() {
-                  _isloading = true;
+                  _isLoading = true;
                 });
                 try {
                   final userCredentials = await _auth
@@ -78,7 +78,7 @@ class LoginScreenState extends State<LoginScreen> {
                     Navigator.pushNamed(context, ChatScreen.id);
                   }
                   setState(() {
-                    _isloading = false;
+                    _isLoading = false;
                   });
                 } catch (e) {
                   ScaffoldMessenger.of(

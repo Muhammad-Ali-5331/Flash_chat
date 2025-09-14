@@ -15,14 +15,14 @@ class RegistrationScreen extends StatefulWidget {
 class RegistrationScreenState extends State<RegistrationScreen> {
   late String email;
   late String password;
-  bool _isloading = false;
+  bool _isLoading = false;
   final _authorizer = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: ModalProgressHUD(
-        inAsyncCall: _isloading,
+        inAsyncCall: _isLoading,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
@@ -67,7 +67,7 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                 FocusScope.of(context).unfocus();
                 await Future.delayed(Duration(milliseconds: 300));
                 setState(() {
-                  _isloading = true;
+                  _isLoading = true;
                 });
                 try {
                   final userCredentials = await _authorizer
@@ -78,12 +78,12 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                   final newUser = userCredentials.user;
                   if (newUser != null) {
                     setState(() {
-                      _isloading = false;
+                      _isLoading = false;
                     });
                     Navigator.pushNamed(context, ChatScreen.id);
                   }
                   setState(() {
-                    _isloading = false;
+                    _isLoading = false;
                   });
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
