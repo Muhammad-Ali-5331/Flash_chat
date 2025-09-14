@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../components/rounded_button.dart';
 
@@ -10,6 +12,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
+  late String email;
+  late String password;
+  final _auth = FirebaseAuth.instance;
+  late User loggedInUser;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,8 +35,10 @@ class LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 48.0),
             TextField(
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.center,
               onChanged: (value) {
-                //Do something with the user input.
+                email = value;
               },
               decoration: kTextFieldDecoration.copyWith(
                 hintText: 'Enter your email',
@@ -38,16 +46,32 @@ class LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 8.0),
             TextField(
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.center,
+              obscureText: true,
               onChanged: (value) {
-                //Do something with the user input.
+                password = value;
               },
               decoration: kTextFieldDecoration.copyWith(
                 hintText: 'Enter your password.',
               ),
             ),
             SizedBox(height: 24.0),
-            RoundedButton(Colors.lightBlueAccent, 'Log in', () {
-              Navigator.pushNamed(context, LoginScreen.id);
+            RoundedButton(Colors.lightBlueAccent, 'Log in', () async {
+              try {
+                final userCredentials = await _auth.signInWithEmailAndPassword(
+                  email: email,
+                  password: password,
+                );
+                final user = userCredentials.user;
+                if (user != null) {
+                  Navigator.pushNamed(context, ChatScreen.id);
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+              }
             }),
           ],
         ),
