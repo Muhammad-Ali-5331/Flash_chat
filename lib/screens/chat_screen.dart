@@ -19,8 +19,8 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized();
-    getCurrentUser();
     super.initState();
+    getCurrentUser();
   }
 
   void getCurrentUser() async {
@@ -30,6 +30,21 @@ class ChatScreenState extends State<ChatScreen> {
       print(loggedInUser.email);
     } else {
       Navigator.pop(context);
+    }
+  }
+
+  void messagesStream() async {
+    await for (var snapshot in _firestore.collection('messages').snapshots()) {
+      for (var message in snapshot.docs) {
+        print(message.data());
+      }
+    }
+  }
+
+  void getMessages() async {
+    final messages = await _firestore.collection('messages').get();
+    for (var message in messages.docs) {
+      print(message.data());
     }
   }
 
@@ -73,26 +88,28 @@ class ChatScreenState extends State<ChatScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      try {
-                        if (messageText != null) {
-                          _firestore.collection('messages').add({
-                            'text': messageText,
-                            'sender': loggedInUser.email,
-                          });
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '[!] Message should contain some text',
-                              ),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('[!] Error Occurred: $e')),
-                        );
-                      }
+                      //getMessages();
+                      messagesStream();
+                      // try {
+                      //   if (messageText != null) {
+                      //     _firestore.collection('messages').add({
+                      //       'text': messageText,
+                      //       'sender': loggedInUser.email,
+                      //     });
+                      //   } else {
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(
+                      //         content: Text(
+                      //           '[!] Message should contain some text',
+                      //         ),
+                      //       ),
+                      //     );
+                      //   }
+                      // } catch (e) {
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(content: Text('[!] Error Occurred: $e')),
+                      //   );
+                      // }
                     },
                     child: Text('Send', style: kSendButtonTextStyle),
                   ),
