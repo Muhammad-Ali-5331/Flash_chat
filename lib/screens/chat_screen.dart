@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
+
   static String id = "chatScreen";
+
   @override
   ChatScreenState createState() => ChatScreenState();
 }
@@ -13,6 +15,7 @@ class ChatScreen extends StatefulWidget {
 class ChatScreenState extends State<ChatScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  final TextEditingController _messageController = TextEditingController();
   late User loggedInUser;
   String? messageText;
 
@@ -21,6 +24,7 @@ class ChatScreenState extends State<ChatScreen> {
     WidgetsFlutterBinding.ensureInitialized();
     super.initState();
     getCurrentUser();
+    messagesStream();
   }
 
   void getCurrentUser() async {
@@ -72,6 +76,34 @@ class ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore.collection('messages').snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (!snapshot.hasData) {
+                  return Center(
+                    child: Text(
+                      'No Messages..',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  );
+                } else {
+                  final messages = snapshot.data!.docs;
+                  List<Text> messagesText = [];
+                  for (var message in messages) {
+                    var data = message.data() as Map<String, dynamic>;
+                    messagesText.add(
+                      Text(
+                        '${data['text']} from ${data['sender']}',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    );
+                  }
+                  return Expanded(child: ListView(children: messagesText));
+                }
+              },
+            ),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -79,6 +111,7 @@ class ChatScreenState extends State<ChatScreen> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: _messageController,
                       style: TextStyle(color: Colors.black),
                       onChanged: (value) {
                         messageText = value;
@@ -88,28 +121,27 @@ class ChatScreenState extends State<ChatScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      //getMessages();
-                      messagesStream();
-                      // try {
-                      //   if (messageText != null) {
-                      //     _firestore.collection('messages').add({
-                      //       'text': messageText,
-                      //       'sender': loggedInUser.email,
-                      //     });
-                      //   } else {
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(
-                      //         content: Text(
-                      //           '[!] Message should contain some text',
-                      //         ),
-                      //       ),
-                      //     );
-                      //   }
-                      // } catch (e) {
-                      //   ScaffoldMessenger.of(context).showSnackBar(
-                      //     SnackBar(content: Text('[!] Error Occurred: $e')),
-                      //   );
-                      // }
+                      try {
+                        if (messageText != '') {
+                          _firestore.collection('messages').add({
+                            'text': messageText,
+                            'sender': loggedInUser.email,
+                          });
+                          _messageController.clear();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                '[!] Message should contain some text',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('[!] Error Occurred: $e')),
+                        );
+                      }
                     },
                     child: Text('Send', style: kSendButtonTextStyle),
                   ),
