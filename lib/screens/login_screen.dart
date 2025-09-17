@@ -77,13 +77,18 @@ class LoginScreenState extends State<LoginScreen> {
                   if (user != null) {
                     Navigator.pushNamed(context, ChatScreen.id);
                   }
-                  setState(() {
-                    _isLoading = false;
-                  });
+                } on FirebaseException catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Login failed: ${e.message}')),
+                  );
                 } catch (e) {
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+                } finally {
+                  setState(() {
+                    _isLoading = false;
+                  });
                 }
               }),
             ],
