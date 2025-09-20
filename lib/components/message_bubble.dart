@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 class MessageBubble extends StatelessWidget {
   final String text;
   final String sender;
-
-  const MessageBubble({super.key, required this.sender, required this.text});
+  final String time;
+  const MessageBubble({
+    super.key,
+    required this.sender,
+    required this.text,
+    required this.time,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,7 @@ class MessageBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(sender, style: TextStyle(fontSize: 12.0)),
+          Text('$sender ($time)', style: TextStyle(fontSize: 12.0)),
           Material(
             elevation: 10.0,
             color: Colors.blueAccent,
