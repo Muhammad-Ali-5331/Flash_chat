@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flash_chat/components/message_bubble.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flash_chat/constants.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -34,6 +35,17 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  String getFormattedCurrentTime() {
+    final now = DateTime.now();
+    final formatter = DateFormat("MMM d, yyyy - hh:mm a");
+    return formatter.format(now);
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    final dateTime = timestamp.toDate();
+    return DateFormat("MMM d, yyyy - hh:mm a").format(dateTime).toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +69,10 @@ class ChatScreenState extends State<ChatScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[streamBuilder(), messageEntryField(context)],
+          children: <Widget>[
+            Expanded(child: streamBuilder()),
+            messageEntryField(context),
+          ],
         ),
       ),
     );
@@ -69,7 +84,6 @@ class ChatScreenState extends State<ChatScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          streamBuilder(),
           Expanded(
             child: TextField(
               controller: messageController,
@@ -85,8 +99,9 @@ class ChatScreenState extends State<ChatScreen> {
               try {
                 if (messageText != null && messageText!.isNotEmpty) {
                   FirebaseFirestore.instance.collection('messages').add({
-                    'text': messageText,
+                    'message': messageText,
                     'sender': loggedInUser.email,
+                    'timestamp': FieldValue.serverTimestamp(),
                   });
                   messageController.clear();
                 } else {
@@ -111,7 +126,10 @@ class ChatScreenState extends State<ChatScreen> {
 
   StreamBuilder<QuerySnapshot<Object?>> streamBuilder() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('messages').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('messages')
+          .orderBy('timestamp')
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -125,10 +143,16 @@ class ChatScreenState extends State<ChatScreen> {
           for (var message in messages) {
             var data = message.data() as Map<String, dynamic>;
             messagesBubbles.add(
-              MessageBubble(sender: data['sender'], text: data['text']),
+              MessageBubble(
+                sender: data['sender'],
+                text: data['message'],
+                time: data['timestamp'] != null
+                    ? formatTimestamp(data['timestamp'])
+                    : 'Fetching Time...',
+              ),
             );
           }
-          return Expanded(child: ListView(children: messagesBubbles));
+          return ListView(reverse: true, children: messagesBubbles);
         }
       },
     );
