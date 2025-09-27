@@ -151,7 +151,7 @@ class ChatScreenState extends State<ChatScreen> {
             var data = message.data() as Map<String, dynamic>;
             messagesBubbles.add(
               MessageBubble(
-                sender: data['sender'],
+                sender: loggedInUser.displayName ?? '',
                 text: data['message'],
                 time: data['timestamp'] != null
                     ? formatTimestamp(data['timestamp'])
