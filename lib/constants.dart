@@ -30,3 +30,15 @@ const kTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
+
+const border = Radius.circular(20.0);
+const isMeStyle = BorderRadius.only(
+  topRight: border,
+  bottomLeft: border,
+  bottomRight: border,
+);
+const isNotMeStyle = BorderRadius.only(
+  topLeft: border,
+  bottomLeft: border,
+  bottomRight: border,
+);
