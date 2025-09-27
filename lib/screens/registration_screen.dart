@@ -110,20 +110,20 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                         );
                     final newUser = userCredentials.user;
                     if (newUser != null) {
-                      // 2. Update displayName in Firebase Auth
+                      //Update displayName in Firebase Auth
                       await newUser.updateDisplayName(name);
                       await newUser.reload(); // refresh user info
 
-                      // 3. Save user info in Firestore (recommended for later use)
-                      await FirebaseFirestore.instance
-                          .collection("users")
-                          .doc(newUser.uid)
-                          .set({
-                            "uid": newUser.uid,
-                            "name": name,
-                            "email": email,
-                            "createdAt": DateTime.now(),
-                          });
+                      // Save user info in Firestore (recommended for later use)
+                      // await FirebaseFirestore.instance
+                      //     .collection("users")
+                      //     .doc(newUser.uid)
+                      //     .set({
+                      //       "uid": newUser.uid,
+                      //       "name": name,
+                      //       "email": email,
+                      //       "createdAt": DateTime.now(),
+                      //     });
                       Navigator.pushNamed(context, ChatScreen.id);
                     }
                   } on FirebaseException catch (e) {
