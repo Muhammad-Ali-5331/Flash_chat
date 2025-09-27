@@ -138,6 +138,7 @@ class ChatScreenState extends State<ChatScreen> {
             child: Text('No Messages..', style: TextStyle(color: Colors.black)),
           );
         } else {
+          final currentUser = loggedInUser.email;
           final messages = snapshot.data!.docs;
           List<MessageBubble> messagesBubbles = [];
           for (var message in messages) {
@@ -149,6 +150,7 @@ class ChatScreenState extends State<ChatScreen> {
                 time: data['timestamp'] != null
                     ? formatTimestamp(data['timestamp'])
                     : 'Fetching Time...',
+                isMe: data['sender'] == currentUser,
               ),
             );
           }
