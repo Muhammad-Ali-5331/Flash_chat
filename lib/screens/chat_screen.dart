@@ -152,7 +152,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             );
           }
-          return ListView(reverse: true, children: messagesBubbles);
+          return ListView(children: messagesBubbles);
         }
       },
     );
