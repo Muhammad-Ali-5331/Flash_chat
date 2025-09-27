@@ -3,6 +3,7 @@ import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../components/rounded_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class RegistrationScreenState extends State<RegistrationScreen> {
+  late String name = '';
   late String email;
   late String password;
   bool _isLoading = false;
@@ -29,14 +31,28 @@ class RegistrationScreenState extends State<RegistrationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Hero(
-                tag: 'logo',
-                child: SizedBox(
-                  height: 200.0,
-                  child: Image.asset('images/logo.png'),
+              Flexible(
+                child: Hero(
+                  tag: 'logo',
+                  child: SizedBox(
+                    height: 200.0,
+                    child: Image.asset('images/logo.png'),
+                  ),
                 ),
               ),
               SizedBox(height: 48.0),
+              TextField(
+                style: TextStyle(color: Colors.black),
+                textAlign: TextAlign.center,
+                onChanged: (value) {
+                  //Name Entry Field
+                  name = value;
+                },
+                decoration: kTextFieldDecoration.copyWith(
+                  hintText: 'Enter your display name',
+                ),
+              ),
+              SizedBox(height: 8.0),
               TextField(
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: Colors.black),
@@ -65,32 +81,66 @@ class RegistrationScreenState extends State<RegistrationScreen> {
               SizedBox(height: 24.0),
               RoundedButton(Colors.blueAccent, 'Register', () async {
                 FocusScope.of(context).unfocus();
-                await Future.delayed(Duration(milliseconds: 300));
-                setState(() {
-                  _isLoading = true;
-                });
-                try {
-                  final userCredentials = await _authorizer
-                      .createUserWithEmailAndPassword(
-                        email: email,
-                        password: password,
-                      );
-                  final newUser = userCredentials.user;
-                  if (newUser != null) {
-                    Navigator.pushNamed(context, ChatScreen.id);
-                  }
-                } on FirebaseException catch (e) {
+                await Future.delayed(Duration(milliseconds: 500));
+                if (name == '') {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Login failed: ${e.message}')),
+                    SnackBar(
+                      content: Text(
+                        'Registration failed: Name field cannot be empty',
+                      ),
+                    ),
                   );
-                } catch (e) {
+                } else if (name.length > 15) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Registration failed: $e')),
+                    SnackBar(
+                      content: Text(
+                        'Registration failed: Length of name should be less than or equal to 15 characters',
+                      ),
+                    ),
                   );
-                } finally {
+                } else {
                   setState(() {
-                    _isLoading = false;
+                    _isLoading = true;
                   });
+                  try {
+                    final userCredentials = await _authorizer
+                        .createUserWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
+                    final newUser = userCredentials.user;
+                    if (newUser != null) {
+                      // 2. Update displayName in Firebase Auth
+                      await newUser.updateDisplayName(name);
+                      await newUser.reload(); // refresh user info
+
+                      // 3. Save user info in Firestore (recommended for later use)
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(newUser.uid)
+                          .set({
+                            "uid": newUser.uid,
+                            "name": name,
+                            "email": email,
+                            "createdAt": DateTime.now(),
+                          });
+                      Navigator.pushNamed(context, ChatScreen.id);
+                    }
+                  } on FirebaseException catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Registration failed: ${e.message}'),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Registration failed: $e')),
+                    );
+                  } finally {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
                 }
               }),
             ],
