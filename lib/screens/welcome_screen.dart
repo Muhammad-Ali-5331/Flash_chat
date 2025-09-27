@@ -21,7 +21,7 @@ class WelcomeScreenState extends State<WelcomeScreen>
     super.initState();
     controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: 1),
     );
     animation = ColorTween(
       begin: Colors.red,
@@ -68,7 +68,7 @@ class WelcomeScreenState extends State<WelcomeScreen>
                       animatedTexts: [
                         TypewriterAnimatedText(
                           'Flash Chat',
-                          speed: Duration(seconds: 2),
+                          speed: Duration(milliseconds: 500),
                         ),
                       ],
                       repeatForever: true,
