@@ -26,6 +26,12 @@ class ChatScreenState extends State<ChatScreen> {
     getCurrentUser();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    messageController.dispose();
+  }
+
   void getCurrentUser() async {
     final user = await FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -128,7 +134,7 @@ class ChatScreenState extends State<ChatScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('messages')
-          .orderBy('timestamp')
+          .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -154,7 +160,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             );
           }
-          return ListView(children: messagesBubbles);
+          return ListView(reverse: true, children: messagesBubbles);
         }
       },
     );
