@@ -36,8 +36,6 @@ class ChatScreenState extends State<ChatScreen> {
     final user = await FirebaseAuth.instance.currentUser;
     if (user != null) {
       loggedInUser = user;
-    } else {
-      Navigator.pop(context);
     }
   }
 
@@ -62,9 +60,11 @@ class ChatScreenState extends State<ChatScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.close),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
+            onPressed: () async {
+              // Sign out from Firebase
+              await FirebaseAuth.instance.signOut();
+              // The AuthenticationWrapper will automatically detect the sign out
+              // and navigate to WelcomeScreen, so we don't need to manually navigate
             },
           ),
         ],
