@@ -16,6 +16,7 @@ class WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late Animation animation;
+
   @override
   void initState() {
     super.initState();
@@ -24,10 +25,12 @@ class WelcomeScreenState extends State<WelcomeScreen>
       duration: Duration(seconds: 1),
     );
     animation = ColorTween(
-      begin: Colors.red,
-      end: Colors.blue,
+      begin: Colors.blueAccent,
+      end: Colors.blueAccent,
     ).animate(controller);
-    controller.repeat(reverse: true);
+
+    controller.forward();
+
     controller.addListener(() {
       setState(() {});
     });
@@ -35,14 +38,14 @@ class WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   void dispose() {
-    super.dispose();
     controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: animation.value,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -63,15 +66,17 @@ class WelcomeScreenState extends State<WelcomeScreen>
                     style: const TextStyle(
                       fontSize: 45.0,
                       fontWeight: FontWeight.w900,
+                      color: Colors.white,
                     ),
                     child: AnimatedTextKit(
                       animatedTexts: [
                         TypewriterAnimatedText(
                           'Flash Chat',
-                          speed: Duration(milliseconds: 500),
+                          speed: Duration(milliseconds: 100),
                         ),
                       ],
                       repeatForever: true,
+                      pause: Duration(seconds: 2),
                     ),
                   ),
                 ],
