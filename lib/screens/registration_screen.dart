@@ -3,7 +3,6 @@ import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../components/rounded_button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -19,6 +18,7 @@ class RegistrationScreenState extends State<RegistrationScreen> {
   late String password;
   bool _isLoading = false;
   final _authorizer = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +45,6 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                 style: TextStyle(color: Colors.black),
                 textAlign: TextAlign.center,
                 onChanged: (value) {
-                  //Name Entry Field
                   name = value;
                 },
                 decoration: kTextFieldDecoration.copyWith(
@@ -58,7 +57,6 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                 style: TextStyle(color: Colors.black),
                 textAlign: TextAlign.center,
                 onChanged: (value) {
-                  //Email Entry Field
                   email = value;
                 },
                 decoration: kTextFieldDecoration.copyWith(
@@ -71,7 +69,6 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                 textAlign: TextAlign.center,
                 obscureText: true,
                 onChanged: (value) {
-                  //Password Entry Field
                   password = value;
                 },
                 decoration: kTextFieldDecoration.copyWith(
@@ -110,21 +107,11 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                         );
                     final newUser = userCredentials.user;
                     if (newUser != null) {
-                      //Update displayName in Firebase Auth
                       await newUser.updateDisplayName(name);
-                      await newUser.reload(); // refresh user info
+                      await newUser.reload();
 
-                      // Save user info in Firestore (recommended for later use)
-                      // await FirebaseFirestore.instance
-                      //     .collection("users")
-                      //     .doc(newUser.uid)
-                      //     .set({
-                      //       "uid": newUser.uid,
-                      //       "name": name,
-                      //       "email": email,
-                      //       "createdAt": DateTime.now(),
-                      //     });
-                      Navigator.pushNamed(context, ChatScreen.id);
+                      // Use pushReplacementNamed to prevent back navigation
+                      Navigator.pushReplacementNamed(context, ChatScreen.id);
                     }
                   } on FirebaseException catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
