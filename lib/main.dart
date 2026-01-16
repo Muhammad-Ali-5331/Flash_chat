@@ -4,6 +4,7 @@ import 'package:flash_chat/screens/registration_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flash_chat/screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() async {
 
 class FlashChat extends StatelessWidget {
   const FlashChat({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,7 +28,35 @@ class FlashChat extends StatelessWidget {
         RegistrationScreen.id: (context) => RegistrationScreen(),
         ChatScreen.id: (context) => ChatScreen(),
       },
-      initialRoute: WelcomeScreen.id,
+      home: AuthenticationWrapper(),
+    );
+  }
+}
+
+class AuthenticationWrapper extends StatelessWidget {
+  const AuthenticationWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Show loading while checking auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Colors.blueAccent,
+            body: Center(child: CircularProgressIndicator(color: Colors.white)),
+          );
+        }
+
+        // If user is logged in, go to chat screen
+        if (snapshot.hasData && snapshot.data != null) {
+          return ChatScreen();
+        }
+
+        // Otherwise, show welcome screen
+        return WelcomeScreen();
+      },
     );
   }
 }
