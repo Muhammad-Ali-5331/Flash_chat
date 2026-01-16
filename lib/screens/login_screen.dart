@@ -18,6 +18,7 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final _auth = FirebaseAuth.instance;
   late User loggedInUser;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +78,8 @@ class LoginScreenState extends State<LoginScreen> {
                       );
                   final user = userCredentials.user;
                   if (user != null) {
-                    Navigator.pushNamed(context, ChatScreen.id);
+                    // Use pushReplacementNamed to prevent back navigation
+                    Navigator.pushReplacementNamed(context, ChatScreen.id);
                   }
                 } on FirebaseException catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
