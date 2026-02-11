@@ -149,14 +149,17 @@ class ChatScreenState extends State<ChatScreen> {
           List<MessageBubble> messagesBubbles = [];
           for (var message in messages) {
             var data = message.data() as Map<String, dynamic>;
+            final isMe = data['sender'] == currentUser;
             messagesBubbles.add(
               MessageBubble(
-                sender: loggedInUser.displayName ?? '',
+                sender: isMe
+                    ? ''
+                    : (data['senderName'] ?? data['sender'] ?? 'Unknown'),
                 text: data['message'],
                 time: data['timestamp'] != null
                     ? formatTimestamp(data['timestamp'])
                     : 'Fetching Time...',
-                isMe: data['sender'] == currentUser,
+                isMe: isMe,
               ),
             );
           }
