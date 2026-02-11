@@ -106,7 +106,8 @@ class ChatScreenState extends State<ChatScreen> {
                 if (messageText != null && messageText!.isNotEmpty) {
                   FirebaseFirestore.instance.collection('messages').add({
                     'message': messageText,
-                    'sender': loggedInUser.email,
+                    'senderEmail': loggedInUser.email,
+                    'senderName': loggedInUser.displayName,
                     'timestamp': FieldValue.serverTimestamp(),
                   });
                   messageController.clear();
@@ -149,12 +150,12 @@ class ChatScreenState extends State<ChatScreen> {
           List<MessageBubble> messagesBubbles = [];
           for (var message in messages) {
             var data = message.data() as Map<String, dynamic>;
-            final isMe = data['sender'] == currentUser;
+            final isMe = data['senderEmail'] == currentUser;
             messagesBubbles.add(
               MessageBubble(
                 sender: isMe
                     ? ''
-                    : (data['senderName'] ?? data['sender'] ?? 'Unknown'),
+                    : (data['senderName'] ?? data['senderName'] ?? 'Unknown'),
                 text: data['message'],
                 time: data['timestamp'] != null
                     ? formatTimestamp(data['timestamp'])
